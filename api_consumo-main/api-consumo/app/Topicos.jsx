@@ -61,7 +61,16 @@ export default function Topicos() {
 
   return (
     <View style={styles.container}>
-      {/* 🔹 Barra fixa */}
+   
+      {/* 🔹 Lista de tópicos */}
+      <FlatList
+        data={topicos}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={styles.lista}
+        showsVerticalScrollIndicator={false}
+      />
+         {/* 🔹 Barra fixa */}
       <View style={styles.barraFixa}>
         <Link style={styles.menuLink} href={{ pathname: "/Home" }}>
           🏠 Home
@@ -74,14 +83,6 @@ export default function Topicos() {
         </Link>
       </View>
 
-      {/* 🔹 Lista de tópicos */}
-      <FlatList
-        data={topicos}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.lista}
-        showsVerticalScrollIndicator={false}
-      />
     </View>
   );
 }

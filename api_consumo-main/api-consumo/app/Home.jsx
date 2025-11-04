@@ -58,17 +58,6 @@ export default function Home() {
   return (
     <View style={styles.container}>
       {/* 🔹 Barra fixa */}
-      <View style={styles.barraFixa}>
-        <Link style={[styles.menuLink, styles.menuAtivo]} href={{ pathname: "/Home" }}>
-          🏠 Home
-        </Link>
-        <Link style={styles.menuLink} href={{ pathname: "/Topicos" }}>
-          📚 Tópicos
-        </Link>
-        <Link style={styles.menuLink} href={{ pathname: "/Perfil" }}>
-          👤 Perfil
-        </Link>
-      </View>
 
       {/* 🔹 Feed */}
       <ScrollView
@@ -97,6 +86,18 @@ export default function Home() {
           </TouchableOpacity>
         ))}
       </ScrollView>
+            <View style={styles.barraFixa}>
+        <Link style={[styles.menuLink, styles.menuAtivo]} href={{ pathname: "/Home" }}>
+          🏠 Home
+        </Link>
+        <Link style={styles.menuLink} href={{ pathname: "/Topicos" }}>
+          📚 Tópicos
+        </Link>
+        <Link style={styles.menuLink} href={{ pathname: "/Perfil" }}>
+          👤 Perfil
+        </Link>
+      </View>
+
     </View>
   );
 }
