@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity, Alert, Modal } from "react-native";
 import { Link } from "expo-router";
 
 export default function Perfil() {
   const [abaAtiva, setAbaAtiva] = useState("publicacoes");
-
-  const postsFelipe = [
+  const [modalOptionsVisible, setModalOptionsVisible] = useState(null); // Guarda ID do post aberto no menu
+  const [editingPostId, setEditingPostId] = useState(null);
+  const [editedText, setEditedText] = useState("");
+  const [postsFelipe, setPostsFelipe] = useState([
     {
       id: 1,
       titulo: "Novo cover 🎸",
@@ -18,15 +20,42 @@ export default function Perfil() {
       descricao: "Tentei misturar elementos de pop e rock para criar uma música mais leve e melódica.",
       imagem: require("../assets/images/react-logo.png"),
     },
-  ];
+  ]);
 
   const amigos = ["Mariana Costa", "Ricardo Lopes", "Thiago Martins", "Lívia Torres"];
+w
+function excluirPost(id){
+          setPostsFelipe(postsFelipe.filter((p) => p.id !== id));
+          setModalOptionsVisible(null);
+
+        };
+
+  // ✅ INICIAR EDIÇÃO
+  const iniciarEdicao = (post) => {
+    setEditingPostId(post.id);
+    setEditedText(post.descricao);
+    setModalOptionsVisible(null);
+  };
+
+  // ✅ SALVAR ALTERAÇÃO
+  const salvarEdicao = () => {
+    setPostsFelipe(
+      postsFelipe.map((p) =>
+        p.id === editingPostId ? { ...p, descricao: editedText } : p
+      )
+    );
+    setEditingPostId(null);
+  };
+
+  // ✅ CANCELAR EDIÇÃO
+  const cancelarEdicao = () => {
+    setEditingPostId(null);
+  };
+  
+
 
   return (
     <View style={styles.container}>
-      {/* 🔹 Barra fixa */}
-   
-
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* 🔹 Identidade */}
         <View style={styles.cardIdentidade}>
@@ -39,6 +68,14 @@ export default function Perfil() {
               Músico apaixonado por explorar novos sons e misturar estilos. Sempre em busca da próxima melodia.
             </Text>
           </View>
+
+               {/* ✅ BOTÃO EDITAR PERFIL */}
+          <TouchableOpacity
+            style={styles.btnEditarPerfil}
+            onPress={() => Alert.alert("Editar Perfil", "Aqui abrirá a tela de edição")}
+          >
+            <Text style={styles.btnEditarTexto}>Editar</Text>
+          </TouchableOpacity>
         </View>
 
         {/* 🔹 Menu secundário */}
@@ -47,66 +84,93 @@ export default function Perfil() {
             style={[styles.botaoAba, abaAtiva === "topicos" && styles.botaoAtivo]}
             onPress={() => setAbaAtiva("topicos")}
           >
-            <Text style={[styles.textoBotao, abaAtiva === "topicos" && styles.textoAtivo]}>
-              🧩 Tópicos
-            </Text>
+            <Text style={[styles.textoBotao, abaAtiva === "topicos" && styles.textoAtivo]}>🧩 Tópicos</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.botaoAba, abaAtiva === "publicacoes" && styles.botaoAtivo]}
             onPress={() => setAbaAtiva("publicacoes")}
           >
-            <Text style={[styles.textoBotao, abaAtiva === "publicacoes" && styles.textoAtivo]}>
-              📝 Publicações
-            </Text>
+            <Text style={[styles.textoBotao, abaAtiva === "publicacoes" && styles.textoAtivo]}>📝 Publicações</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.botaoAba, abaAtiva === "amigos" && styles.botaoAtivo]}
             onPress={() => setAbaAtiva("amigos")}
           >
-            <Text style={[styles.textoBotao, abaAtiva === "amigos" && styles.textoAtivo]}>
-              👥 Amigos
-            </Text>
+            <Text style={[styles.textoBotao, abaAtiva === "amigos" && styles.textoAtivo]}>👥 Amigos</Text>
           </TouchableOpacity>
         </View>
 
-        {/* 🔹 Conteúdos das abas */}
-        {abaAtiva === "topicos" && (
-          <View style={styles.listaSecao}>
-            <Text style={styles.textoSecao}>Você participa de 3 tópicos:</Text>
-
-            <View style={styles.itemTopico}>
-              <Text style={styles.tituloTopico}>🎸 Técnicas de Guitarra</Text>
-              <Text style={styles.descTopico}>Discussão sobre palhetadas, solos e timbres.</Text>
-            </View>
-
-            <View style={styles.itemTopico}>
-              <Text style={styles.tituloTopico}>🥁 Ritmos e Grooves</Text>
-              <Text style={styles.descTopico}>Aprendendo a manter o groove no tempo certo.</Text>
-            </View>
-
-            <View style={styles.itemTopico}>
-              <Text style={styles.tituloTopico}>🎹 Harmonia Moderna</Text>
-              <Text style={styles.descTopico}>Explorando acordes e progressões criativas.</Text>
-            </View>
-          </View>
-        )}
-
+        {/* 🔹 Publicações */}
         {abaAtiva === "publicacoes" && (
           <View style={styles.listaSecao}>
             {postsFelipe.map((post) => (
               <View key={post.id} style={styles.cardPost}>
                 <Image source={post.imagem} style={styles.imagemPost} />
-                <View style={styles.conteudoPost}>
+
+                {/* Nome e botão 3 pontinhos */}
+                <View style={styles.headerPost}>
                   <Text style={styles.tituloPost}>{post.titulo}</Text>
-                  <Text style={styles.descricaoPost}>{post.descricao}</Text>
+
+                  {/* ✅ BOTÃO OPÇÕES */}
+                  <TouchableOpacity onPress={() => setModalOptionsVisible(post.id)}>
+                    <Text style={styles.opcoes}>⋮</Text>
+                  </TouchableOpacity>
                 </View>
+                 {/* ✅ SE ESTIVER EDITANDO */}
+                {editingPostId === post.id ? (
+                  <View style={styles.areaEdicao}>
+                    <TextInput
+                      style={styles.textInput}
+                      multiline
+                      value={editedText}
+                      onChangeText={setEditedText}
+                    />
+
+                    <View style={styles.areaBotoesEdicao}>
+                      <TouchableOpacity style={styles.btnSalvar} onPress={salvarEdicao}>
+                        <Text style={styles.txtSalvar}>Salvar</Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity style={styles.btnCancelar} onPress={cancelarEdicao}>
+                        <Text style={styles.txtCancelar}>Cancelar</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ) : (
+                  <Text style={styles.descricaoPost}>{post.descricao}</Text>
+                )}
+
+
+                {/* ✅ MODAL OPÇÕES */}
+                {modalOptionsVisible === post.id && (
+                  <Modal transparent animationType="fade">
+                    <TouchableOpacity
+                      style={styles.modalOverlay}
+                      onPress={() => setModalOptionsVisible(null)}
+                    >
+                  <View style={styles.modalCaixa}>
+                        <TouchableOpacity style={styles.btnModal} onPress={() => iniciarEdicao(post)}>
+                          <Text style={styles.textoModal}>✏️ Editar</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          style={styles.btnModal}
+                          onPress={() => excluirPost(post.id)}
+                        >
+                          <Text style={styles.textoModalExcluir}>🗑 Excluir</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </TouchableOpacity>
+                  </Modal>
+                )}
               </View>
             ))}
           </View>
         )}
 
+        {/* 🔹 Amigos */}
         {abaAtiva === "amigos" && (
           <View style={styles.listaSecao}>
             {amigos.map((nome, index) => (
@@ -118,54 +182,21 @@ export default function Perfil() {
           </View>
         )}
       </ScrollView>
-         <View style={styles.barraFixa}>
-        <Link style={styles.menuLink} href={{ pathname: "/Home" }}>
-          🏠 Home
-        </Link>
-        <Link style={styles.menuLink} href={{ pathname: "/Topicos" }}>
-          📚 Tópicos
-        </Link>
-        <Link style={[styles.menuLink, styles.menuAtivo]} href={{ pathname: "/Perfil" }}>
-          👤 Perfil
-        </Link>
+
+      {/* 🔹 Barra fixa */}
+      <View style={styles.barraFixa}>
+        <Link style={styles.menuLink} href={{ pathname: "/Home" }}>🏠 Home</Link>
+        <Link style={styles.menuLink} href={{ pathname: "/Topicos" }}>📚 Tópicos</Link>
+        <Link style={[styles.menuLink, styles.menuAtivo]} href={{ pathname: "/Perfil" }}>👤 Perfil</Link>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f2f2f2",
-  },
+  container: { flex: 1, backgroundColor: "#f2f2f2" },
 
-  barraFixa: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    paddingVertical: 12,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    zIndex: 10,
-  },
-
-  menuLink: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#007AFF",
-  },
-
-  menuAtivo: {
-    textDecorationLine: "underline",
-  },
-
-  scrollContent: {
-    padding: 20,
-    paddingTop: 80,
-  },
+  scrollContent: { padding: 20, paddingTop: 80 },
 
   cardIdentidade: {
     backgroundColor: "#fff",
@@ -174,68 +205,39 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     elevation: 3,
+    position: "relative",
   },
 
-  avatar: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    marginRight: 15,
-  },
-
-  infoUsuario: {
-    flex: 1,
-  },
-
-  nome: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-
-  idade: {
-    fontSize: 16,
-    color: "#666",
-  },
-
-  instrumentos: {
-    fontSize: 15,
-    marginVertical: 5,
-    color: "#444",
-  },
-
-  bio: {
-    fontSize: 14,
-    color: "#555",
-    lineHeight: 20,
-  },
-
-  menuSecundario: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginVertical: 20,
-  },
-
-  botaoAba: {
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-    backgroundColor: "#ddd",
-  },
-
-  botaoAtivo: {
+  btnEditarPerfil: {
     backgroundColor: "#007AFF",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    position: "absolute",
+    top: 10,
+    right: 10,
   },
 
-  textoBotao: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#333",
-  },
-
-  textoAtivo: {
+  btnEditarTexto: {
     color: "#fff",
+    fontWeight: "600",
   },
+
+  avatar: { width: 90, height: 90, borderRadius: 45, marginRight: 15 },
+  infoUsuario: { flex: 1 },
+
+  nome: { fontSize: 22, fontWeight: "bold", marginBottom: 4 },
+  idade: { fontSize: 16, color: "#666" },
+  instrumentos: { fontSize: 15, marginVertical: 5, color: "#444" },
+  bio: { fontSize: 14, color: "#555", lineHeight: 20 },
+
+  menuSecundario: { flexDirection: "row", justifyContent: "space-around", marginVertical: 20 },
+
+  botaoAba: { paddingVertical: 8, paddingHorizontal: 15, borderRadius: 8, backgroundColor: "#ddd" },
+  botaoAtivo: { backgroundColor: "#007AFF" },
+
+  textoBotao: { fontSize: 15, fontWeight: "600", color: "#333" },
+  textoAtivo: { color: "#fff" },
 
   listaSecao: {
     backgroundColor: "#fff",
@@ -245,50 +247,60 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
-  textoSecao: {
-    fontSize: 16,
-    marginBottom: 10,
+  cardPost: {
+    marginBottom: 20,
+    backgroundColor: "#f9f9f9",
+    borderRadius: 10,
+    elevation: 2,
+    paddingBottom: 10,
+  },
+
+  imagemPost: { width: "100%", height: 180, borderTopLeftRadius: 10, borderTopRightRadius: 10 },
+
+  headerPost: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    marginTop: 8,
+  },
+
+  tituloPost: { fontWeight: "bold", fontSize: 17 },
+  descricaoPost: { paddingHorizontal: 10, color: "#555", marginTop: 5 },
+
+  opcoes: {
+    fontSize: 25,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
     color: "#444",
   },
 
-  itemTopico: {
-    marginBottom: 10,
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 
-  tituloTopico: {
-    fontWeight: "bold",
+  modalCaixa: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 8,
+    width: 200,
+  },
+
+  btnModal: {
+    paddingVertical: 10,
+  },
+
+  textoModal: {
     fontSize: 16,
   },
 
-  descTopico: {
-    color: "#666",
-  },
-
-  cardPost: {
-    marginBottom: 15,
-    backgroundColor: "#f9f9f9",
-    borderRadius: 10,
-    overflow: "hidden",
-    elevation: 2,
-  },
-
-  imagemPost: {
-    width: "100%",
-    height: 180,
-  },
-
-  conteudoPost: {
-    padding: 10,
-  },
-
-  tituloPost: {
+  textoModalExcluir: {
+    fontSize: 16,
+    color: "red",
     fontWeight: "bold",
-    fontSize: 17,
-    marginBottom: 5,
-  },
-
-  descricaoPost: {
-    color: "#555",
   },
 
   cardAmigo: {
@@ -301,16 +313,17 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
 
-  avatarAmigo: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 10,
+  avatarAmigo: { width: 50, height: 50, borderRadius: 25, marginRight: 10 },
+  nomeAmigo: { fontSize: 16, color: "#333", fontWeight: "600" },
+
+  barraFixa: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    backgroundColor: "#fff",
+    paddingVertical: 12,
+    elevation: 4,
   },
 
-  nomeAmigo: {
-    fontSize: 16,
-    color: "#333",
-    fontWeight: "600",
-  },
+  menuLink: { fontSize: 16, fontWeight: "600", color: "#007AFF" },
+  menuAtivo: { textDecorationLine: "underline" },
 });
