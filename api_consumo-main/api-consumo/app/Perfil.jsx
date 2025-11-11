@@ -23,7 +23,7 @@ export default function Perfil() {
   ]);
 
   const amigos = ["Mariana Costa", "Ricardo Lopes", "Thiago Martins", "Lívia Torres"];
-w
+  const topicos = ["Ténicas em Escalas", "Progamação de Sintetizadores", "Campo Harmonico avançado", "Improvisação em Jazz"];
 function excluirPost(id){
           setPostsFelipe(postsFelipe.filter((p) => p.id !== id));
           setModalOptionsVisible(null);
@@ -174,6 +174,17 @@ function excluirPost(id){
         {abaAtiva === "amigos" && (
           <View style={styles.listaSecao}>
             {amigos.map((nome, index) => (
+              <View key={index} style={styles.cardAmigo}>
+                <Image source={require("../assets/images/icon.png")} style={styles.avatarAmigo} />
+                <Text style={styles.nomeAmigo}>{nome}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+        {/* 🔹 Tópicos */}
+         {abaAtiva === "topicos" && (
+          <View style={styles.listaSecao}>
+            {topicos.map((nome, index) => (
               <View key={index} style={styles.cardAmigo}>
                 <Image source={require("../assets/images/icon.png")} style={styles.avatarAmigo} />
                 <Text style={styles.nomeAmigo}>{nome}</Text>

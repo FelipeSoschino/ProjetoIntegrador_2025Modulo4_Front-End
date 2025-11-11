@@ -58,6 +58,16 @@ export default function Home() {
   return (
     <View style={styles.container}>
       {/* 🔹 Barra fixa */}
+       <View style={styles.barraFixa}>
+        <View style ={styles.menuHome}>
+        <Link style={styles.menuHome} href={{ pathname: "/Home" }}>
+          🏠 Home
+        </Link></View>
+         <View style ={styles.menuConfig}>
+        <Link style={styles.menuConfig} href={{ pathname: "/Perfil" }}>
+          ⚙️ Config
+        </Link></View>
+      </View>
 
       {/* 🔹 Feed */}
       <ScrollView
@@ -127,6 +137,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#007AFF",
+  },
+  menuHome: {
+    paddingLeft: 10,
+    width: "50%",
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#000000",
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    
+  },
+  menuConfig: {
+    paddingRight: 10,
+    width: "50%",
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#000000",
+    flexDirection: "row",
+    justifyContent: "flex-end"
   },
 
   menuAtivo: {
